@@ -1,10 +1,20 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
-from app.database import engine
+from app import models  # noqa: F401  (pour que SQLAlchemy connaisse nos tables)
+from app.database import Base, engine
 
-app = FastAPI(title="StockPro API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+
+app = FastAPI(title="StockPro API", lifespan=lifespan)
 
 
 @app.get("/")
