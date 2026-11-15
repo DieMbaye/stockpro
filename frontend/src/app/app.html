@@ -1,0 +1,12 @@
+<header>
+  <h1>📦 StockPro</h1>
+  <nav>
+    <a routerLink="/" routerLinkActive="actif" [routerLinkActiveOptions]="{ exact: true }">Tableau de bord</a>
+    <a routerLink="/produits" routerLinkActive="actif">Produits</a>
+    <a routerLink="/mouvements" routerLinkActive="actif">Mouvements</a>
+  </nav>
+</header>
+
+<main>
+  <router-outlet />
+</main>

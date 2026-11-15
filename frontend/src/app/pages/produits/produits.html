@@ -1,0 +1,53 @@
+<h2>Produits</h2>
+
+<form class="formulaire" (ngSubmit)="ajouter()">
+  <h3>Ajouter un produit</h3>
+  <label>
+    Nom
+    <input name="nom" [(ngModel)]="formulaire.nom" required />
+  </label>
+  <label>
+    Description
+    <input name="description" [(ngModel)]="formulaire.description" />
+  </label>
+  <label>
+    Prix (FCFA)
+    <input name="prix" type="number" min="0" [(ngModel)]="formulaire.prix" required />
+  </label>
+  <label>
+    Seuil d'alerte
+    <input name="seuil_alerte" type="number" min="0" [(ngModel)]="formulaire.seuil_alerte" required />
+  </label>
+  <button type="submit">Ajouter</button>
+</form>
+
+@if (message(); as texte) {
+  <p class="erreur">{{ texte }}</p>
+}
+
+<table>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th>Prix</th>
+      <th>Quantité</th>
+      <th>Seuil</th>
+      <th>État</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (p of produits(); track p.id) {
+      <tr [class.alerte]="p.en_alerte">
+        <td>{{ p.nom }}</td>
+        <td>{{ p.prix | number }} FCFA</td>
+        <td>{{ p.quantite }}</td>
+        <td>{{ p.seuil_alerte }}</td>
+        <td>{{ p.en_alerte ? '🚨 Stock bas' : '✅ OK' }}</td>
+        <td><button class="supprimer" (click)="supprimer(p)">Supprimer</button></td>
+      </tr>
+    } @empty {
+      <tr><td colspan="6">Aucun produit pour l'instant</td></tr>
+    }
+  </tbody>
+</table>

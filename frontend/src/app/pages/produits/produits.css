@@ -1,0 +1,60 @@
+.formulaire {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  background: #f1f5f9;
+}
+
+.formulaire h3 {
+  width: 100%;
+  margin: 0;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.9rem;
+}
+
+input {
+  padding: 6px 8px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+}
+
+tr.alerte {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.supprimer {
+  color: #b91c1c;
+}
+
+.erreur {
+  color: #b91c1c;
+  font-weight: bold;
+}
+.succes {
+  color: #15803d;
+  font-weight: bold;
+}
+
+select {
+  padding: 6px 8px;
+}

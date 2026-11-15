@@ -1,0 +1,62 @@
+<h2>Mouvements de stock</h2>
+
+<form class="formulaire" (ngSubmit)="enregistrer()">
+  <h3>Enregistrer une entrée ou une sortie</h3>
+  <label>
+    Produit
+    <select name="produit_id" [(ngModel)]="formulaire.produit_id" required>
+      <option [ngValue]="null" disabled>Choisir un produit</option>
+      @for (p of produits(); track p.id) {
+        <option [ngValue]="p.id">{{ p.nom }} (stock : {{ p.quantite }})</option>
+      }
+    </select>
+  </label>
+  <label>
+    Type
+    <select name="type" [(ngModel)]="formulaire.type">
+      <option value="entree">⬇️ Entrée</option>
+      <option value="sortie">⬆️ Sortie</option>
+    </select>
+  </label>
+  <label>
+    Quantité
+    <input name="quantite" type="number" min="1" [(ngModel)]="formulaire.quantite" required />
+  </label>
+  <label>
+    Motif
+    <input name="motif" [(ngModel)]="formulaire.motif" placeholder="Vente, livraison…" />
+  </label>
+  <button type="submit">Enregistrer</button>
+</form>
+
+@if (message(); as texte) {
+  <p class="erreur">{{ texte }}</p>
+}
+@if (succes(); as texte) {
+  <p class="succes">{{ texte }}</p>
+}
+
+<table>
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Produit</th>
+      <th>Type</th>
+      <th>Quantité</th>
+      <th>Motif</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (m of mouvements(); track m.id) {
+      <tr>
+        <td>{{ m.date | date: 'dd/MM/yyyy HH:mm' }}</td>
+        <td>{{ nomProduit(m.produit_id) }}</td>
+        <td>{{ m.type === 'entree' ? '⬇️ Entrée' : '⬆️ Sortie' }}</td>
+        <td>{{ m.quantite }}</td>
+        <td>{{ m.motif ?? '' }}</td>
+      </tr>
+    } @empty {
+      <tr><td colspan="5">Aucun mouvement pour l'instant</td></tr>
+    }
+  </tbody>
+</table>

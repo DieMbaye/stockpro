@@ -1,0 +1,38 @@
+<h2>Tableau de bord</h2>
+
+@if (erreur()) {
+  <p class="erreur">Impossible de joindre l'API. Vérifie qu'elle tourne sur le port 8001.</p>
+} @else {
+  @if (donnees(); as d) {
+    <div class="cartes">
+      <div class="carte">
+        <span>Produits</span>
+        <strong>{{ d.nombre_produits }}</strong>
+      </div>
+      <div class="carte">
+        <span>Valeur du stock</span>
+        <strong>{{ d.valeur_totale_stock | number }} FCFA</strong>
+      </div>
+      <div class="carte" [class.alerte]="d.nombre_alertes > 0">
+        <span>Alertes</span>
+        <strong>{{ d.nombre_alertes }}</strong>
+      </div>
+    </div>
+
+    <h3>🚨 Produits en alerte</h3>
+    @for (p of d.produits_en_alerte; track p.id) {
+      <p class="ligne-alerte">{{ p.nom }} : {{ p.quantite }} en stock (seuil : {{ p.seuil_alerte }})</p>
+    } @empty {
+      <p>Aucun produit en alerte ✅</p>
+    }
+
+    <h3>Derniers mouvements</h3>
+    @for (m of d.derniers_mouvements; track m.id) {
+      <p>{{ m.type === 'entree' ? '⬇️ Entrée' : '⬆️ Sortie' }} de {{ m.quantite }} (produit n°{{ m.produit_id }})</p>
+    } @empty {
+      <p>Aucun mouvement pour l'instant</p>
+    }
+  } @else {
+    <p>Chargement…</p>
+  }
+}
