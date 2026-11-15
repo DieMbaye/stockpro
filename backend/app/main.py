@@ -1,4 +1,8 @@
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
+from sqlalchemy import text
+
+from app.database import engine
 
 app = FastAPI(title="StockPro API")
 
@@ -10,4 +14,12 @@ def accueil():
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    try:
+        with engine.connect() as connexion:
+            connexion.execute(text("SELECT 1"))
+        return {"status": "ok", "database": "ok"}
+    except Exception:
+        return JSONResponse(
+            status_code=503,
+            content={"status": "error", "database": "indisponible"},
+        )
