@@ -23,7 +23,7 @@ def enregistrer_mouvement(donnees: MouvementCreation, db: Session = Depends(get_
                 status_code=400,
                 detail=f"Stock insuffisant : il reste {produit.quantite} unité(s)",
             )
-        produit.quantite -= donnees.quantite
+        produit.quantite += donnees.quantite
 
     mouvement = Mouvement(**donnees.model_dump())
     db.add(mouvement)
