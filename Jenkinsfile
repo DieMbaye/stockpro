@@ -74,6 +74,35 @@ pipeline {
                 }
             }
         }
+
+        stage('Déploiement (staging)') {
+            steps {
+                withCredentials([string(credentialsId: 'stockpro-staging-db-password', variable: 'POSTGRES_PASSWORD')]) {
+                    sh 'docker compose -f deploy/docker-compose.staging.yml up -d --pull always'
+                }
+            }
+        }
+
+        stage('Vérification de santé') {
+            steps {
+                withCredentials([string(credentialsId: 'stockpro-staging-db-password', variable: 'POSTGRES_PASSWORD')]) {
+                    sh '''
+                        echo "Vérification de StockPro staging..."
+                        for i in $(seq 1 30); do
+                          if curl -fsS http://host.docker.internal:8091/api/health; then
+                            echo ""
+                            echo "✅ StockPro staging est en bonne santé (version $IMAGE_TAG)"
+                            exit 0
+                          fi
+                          sleep 3
+                        done
+                        echo "❌ L'application ne répond pas : voici ses derniers logs"
+                        docker compose -f deploy/docker-compose.staging.yml logs --tail=50
+                        exit 1
+                    '''
+                }
+            }
+        }
     }
 
     post {
@@ -86,7 +115,7 @@ pipeline {
             '''
         }
         success {
-            echo "✅ Images publiées sur Docker Hub avec le tag ${IMAGE_TAG} !"
+            echo "✅ Version ${IMAGE_TAG} testée, publiée et déployée en staging !"
         }
         failure {
             echo '❌ Pipeline en échec : regarde l\'étape en rouge pour comprendre pourquoi.'
