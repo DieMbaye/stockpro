@@ -1,0 +1,43 @@
+name: stockpro-staging
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: stockpro
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Mot de passe de la base manquant}
+      POSTGRES_DB: stockpro
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stockpro -d stockpro"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    image: diemb/stockpro-backend:${IMAGE_TAG:?Tag de l'image manquant}
+    environment:
+      DATABASE_URL: postgresql+psycopg://stockpro:${POSTGRES_PASSWORD}@db:5432/stockpro
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  frontend:
+    image: diemb/stockpro-frontend:${IMAGE_TAG}
+    ports:
+      - "8091:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db-data:
