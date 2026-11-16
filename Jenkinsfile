@@ -75,30 +75,28 @@ pipeline {
             }
         }
 
-        stage('Déploiement (staging)') {
+        stage('Mise à jour GitOps') {
             steps {
-                withCredentials([string(credentialsId: 'stockpro-staging-db-password', variable: 'POSTGRES_PASSWORD')]) {
-                    sh 'docker compose -f deploy/docker-compose.staging.yml up -d --pull always'
-                }
-            }
-        }
-
-        stage('Vérification de santé') {
-            steps {
-                withCredentials([string(credentialsId: 'stockpro-staging-db-password', variable: 'POSTGRES_PASSWORD')]) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-token',
+                    usernameVariable: 'GITHUB_USER',
+                    passwordVariable: 'GITHUB_TOKEN'
+                )]) {
                     sh '''
-                        echo "Vérification de StockPro staging..."
-                        for i in $(seq 1 30); do
-                          if curl -fsS http://host.docker.internal:8091/api/health; then
-                            echo ""
-                            echo "✅ StockPro staging est en bonne santé (version $IMAGE_TAG)"
-                            exit 0
-                          fi
-                          sleep 3
-                        done
-                        echo "❌ L'application ne répond pas : voici ses derniers logs"
-                        docker compose -f deploy/docker-compose.staging.yml logs --tail=50
-                        exit 1
+                        sed -i "s|image: diemb/stockpro-backend:.*|image: diemb/stockpro-backend:$IMAGE_TAG|" k8s/backend.yaml
+                        sed -i "s|image: diemb/stockpro-frontend:.*|image: diemb/stockpro-frontend:$IMAGE_TAG|" k8s/frontend.yaml
+
+                        git config user.name "Jenkins CI"
+                        git config user.email "jenkins@stockpro.local"
+                        git add k8s/backend.yaml k8s/frontend.yaml
+
+                        if git diff --cached --quiet; then
+                          echo "Les manifestes sont déjà à jour"
+                          exit 0
+                        fi
+
+                        git commit -m "GitOps : déploiement des images $IMAGE_TAG [skip ci]"
+                        git push "https://$GITHUB_USER:$GITHUB_TOKEN@github.com/DieMbaye/stockpro.git" HEAD:main
                     '''
                 }
             }
@@ -115,7 +113,7 @@ pipeline {
             '''
         }
         success {
-            echo "✅ Version ${IMAGE_TAG} testée, publiée et déployée en staging !"
+            echo "✅ Version ${IMAGE_TAG} testée et publiée. Argo CD va la déployer dans Kubernetes 🐙"
         }
         failure {
             echo '❌ Pipeline en échec : regarde l\'étape en rouge pour comprendre pourquoi.'
