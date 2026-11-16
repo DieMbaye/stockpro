@@ -3,10 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
-
+from fastapi.middleware.cors import CORSMiddleware
 from app import models  # noqa: F401  (pour que SQLAlchemy connaisse nos tables)
 from app.database import Base, engine
-
+from app.routers import mouvements, produits, tableau_de_bord
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -15,6 +15,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="StockPro API", lifespan=lifespan)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.include_router(produits.router)
+app.include_router(mouvements.router)
+app.include_router(tableau_de_bord.router)
 
 
 @app.get("/")
