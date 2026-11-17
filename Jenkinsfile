@@ -35,6 +35,18 @@ pipeline {
                 expression { env.IGNORER != 'true' }
             }
             stages {
+                stage('Recherche de secrets (Gitleaks)') {
+                    steps {
+                        sh '''
+                            docker run --rm -u 0 \
+                              --volumes-from jenkins \
+                              -w "$WORKSPACE" \
+                              ghcr.io/gitleaks/gitleaks:latest \
+                              git --redact -v --exit-code 1 .
+                        '''
+                    }
+                }
+
                 stage('Préparer la base de test') {
                     steps {
                         sh '''
