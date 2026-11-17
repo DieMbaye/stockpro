@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import models  # noqa: F401  (pour que SQLAlchemy connaisse nos tables)
 from app.database import Base, engine
 from app.routers import mouvements, produits, tableau_de_bord
+from prometheus_fastapi_instrumentator import Instrumentator
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -24,6 +25,7 @@ app.add_middleware(
 app.include_router(produits.router)
 app.include_router(mouvements.router)
 app.include_router(tableau_de_bord.router)
+Instrumentator().instrument(app).expose(app, include_in_schema=False)
 
 
 @app.get("/")

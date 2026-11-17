@@ -67,3 +67,9 @@ def test_alerte_et_tableau_de_bord(client):
     assert donnees["valeur_totale_stock"] == 450
     assert donnees["nombre_alertes"] == 1
     assert donnees["produits_en_alerte"][0]["en_alerte"] is True
+    
+def test_metrics(client):
+    client.get("/produits")
+    reponse = client.get("/metrics")
+    assert reponse.status_code == 200
+    assert "http_requests_total" in reponse.text
