@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: diemb/stockpro-backend:d57ec94
+          image: diemb/stockpro-backend:59f7546
           ports:
             - containerPort: 8000
           env:

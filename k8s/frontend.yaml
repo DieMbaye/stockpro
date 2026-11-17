@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: diemb/stockpro-frontend:d57ec94
+          image: diemb/stockpro-frontend:59f7546
           ports:
             - containerPort: 8080
           readinessProbe:
